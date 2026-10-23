@@ -377,6 +377,45 @@ cmd_push()
   OK added: "$@"
 }
 
+: mvtoq 'msg' queue values..
+mvtoq()
+{
+  locked 2
+  printf -vm %q "$1"
+  printf -vk ' %q' "${@:3}"
+  v v DBM "$2" get "$k" && EXISTS "${@:2}"
+  for a in todo done fail post hold
+  do
+	v v DBM "$a" get "$k" || continue
+	o DBM "$2" insert "$k" "$a $m"$'\t'"$v"
+	o DBM "$a" delete "$k" "$v"
+	OK "$a:" "$@"
+  done
+  KO missing: "${@:2}"
+}
+
+mvfromq()
+{
+  locked 1
+  printf -vk ' %q' "${@:2}"
+  v v DBM "$1" get "$k" || KO missing: "$@"
+  o DBM "${v%% *}" insert "$k" "${v#*$'\t'}"
+  o DBM "$1" delete "$k" "$v"
+  signal
+  OK "${v%% *}": "$@"
+}
+
+#U hold 'message' val..:	hold entry with given message
+#U	checks for entry in other queues and moves it to hold
+#U oops 'message' val..:	same as hold but oops entry
+cmd_hold() { mvtoq "$1" hold "${@:2}"; }
+cmd_oops() { mvtoq "$1" oops "${@:2}"; }
+
+#U unhold val..:	unhold entry (discards message)
+#U unoops val..:	unoops entry (discards message)
+cmd_unhold()	{ mvfromq hold "$@"; }
+cmd_unoops()	{ mvfromq oops "$@"; }
+
 : something_todo VAR
 something_todo()
 {
