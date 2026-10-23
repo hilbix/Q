@@ -308,7 +308,7 @@ cmd_rm()
 {
   VALID=(done todo fail pids post hold oops)
 
-  locked 1
+  locked 3
 
   isvalid "$1" "${VALID[@]}" || VERBOSE :Q23: valid DBs: "${VALID[@]}" || OOPS not a valid DB: "$1"
 
