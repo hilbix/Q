@@ -512,7 +512,9 @@ cmd_list()
 	case "$a" in
 #U	all	list all known states
 	(all)	cmd_list "${ALL[@]}";;
-#U	undone	list 
+#U	active	list what is in active queues
+	(active)	cmd_list "${TODO[@]}";;
+#U	undone	list all which is not done
 	(undone)	cmd_list "${TODO[@]}" "${OTHER[@]}";;
 #U	done	Q0 successful
 	(done)	do_list done && result OK	$cnt successful;;
