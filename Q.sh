@@ -250,9 +250,9 @@ cmd_ko()	{ OKRUN=; }
 cmd_set()
 {
   locked 2	# we only allow one writer
-  printf -vk 'k%q' "$1"
+  printf -vk %q "$1"
   printf -vv ' %q' "${@:2}"
-  DBM data insert "$k" "$v" && OK inserted: "$@"
+  DBM data insert "$k" "$v" && OK set: "$@"
   o v d DBM data get "$k"
   [ ".$d" = ".$v" ] && EXISTS "$@"
   KO conflict: "$@"
@@ -265,13 +265,25 @@ cmd_get()
   check 1
   for a
   do
-	printf -vk 'k%q' "$a"
+	printf -vk %q "$a"
 	v v DBM data get "$k" || continue
 	echo "$v"
 	OK found: "$a"
 	count || break
   done
   KO none found: "$@"
+}
+
+#U unset k v..:	unset key with given values
+: cmd_unset
+cmd_unset()
+{
+  locked 2	# we only allow one writer
+  printf -vk %q "$1"
+  printf -vv ' %q' "${@:2}"
+  v d DBM data get "$k" || KO missing: "$1"
+  [ ".$d" = ".$v" ] && o DBM data delete "$k" "$v" && OK unset: "$@"
+  KO mismatch: "$@"
 }
 
 #U kick val..:	remove single entry (opposite of push)
